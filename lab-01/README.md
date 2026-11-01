@@ -9,8 +9,12 @@
 ---
 
 ## Live Link
-- **Public URL:** *Local server running at `http://localhost:3000` (Ready for deployment on Render / Railway / Cloud IDE)*  
-- *Deployment Note:* To deploy to Render or Railway, link your GitHub repository and specify the build command `npm install` and start command `npm start` with environment variable `PORT=3000`.
+- **Public URL:** [https://lab-01-two.vercel.app](https://lab-01-two.vercel.app)
+- **Live Endpoints:**
+  - Welcome Text: [https://lab-01-two.vercel.app/](https://lab-01-two.vercel.app/)
+  - Student About JSON: [https://lab-01-two.vercel.app/about](https://lab-01-two.vercel.app/about)
+  - Current Time JSON: [https://lab-01-two.vercel.app/time](https://lab-01-two.vercel.app/time)
+  - 404 Handler Test: [https://lab-01-two.vercel.app/unknown](https://lab-01-two.vercel.app/unknown)
 
 ---
 

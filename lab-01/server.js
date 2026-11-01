@@ -85,17 +85,21 @@ app.use((req, res) => {
 });
 
 // Start Express server on specified port (Task 4)
-const server = app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🚀 Express Server is running successfully!`);
-  console.log(`🌐 Local URL: http://localhost:${PORT}`);
-  console.log(`📍 Available Endpoints:`);
-  console.log(`   - GET  http://localhost:${PORT}/        (Welcome message)`);
-  console.log(`   - GET  http://localhost:${PORT}/about   (Student info JSON)`);
-  console.log(`   - GET  http://localhost:${PORT}/time    (Current date & time)`);
-  console.log(`   - ANY  http://localhost:${PORT}/<other> (404 Not Found error)`);
-  console.log(`====================================================`);
-});
+// Only starts listening when executed directly in local Node environment
+if (require.main === module || (!process.env.VERCEL && process.env.NODE_ENV !== 'production')) {
+  app.listen(PORT, () => {
+    console.log(`====================================================`);
+    console.log(`🚀 Express Server is running successfully!`);
+    console.log(`🌐 Local URL: http://localhost:${PORT}`);
+    console.log(`📍 Available Endpoints:`);
+    console.log(`   - GET  http://localhost:${PORT}/        (Welcome message)`);
+    console.log(`   - GET  http://localhost:${PORT}/about   (Student info JSON)`);
+    console.log(`   - GET  http://localhost:${PORT}/time    (Current date & time)`);
+    console.log(`   - ANY  http://localhost:${PORT}/<other> (404 Not Found error)`);
+    console.log(`====================================================`);
+  });
+}
 
-// Export app for testing or modular usage
-module.exports = { app, server };
+// Export the Express app instance directly for Vercel Serverless Function & testing
+module.exports = app;
+
