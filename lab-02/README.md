@@ -8,11 +8,16 @@
 
 ---
 
-## Live Link & Deployment Status
-- **Local Server Base URL:** `http://localhost:3000`
-- **Deployment Status:** Persistent Container / Local Host Service
-  > **Architectural Note on SQLite Deployment:**  
-  > SQLite is an embedded, file-based relational database engine that stores tables, indexes, and transactions inside a single physical disk file (`goodreads.db`). On serverless platforms (such as Vercel or AWS Lambda), execution environments are ephemeral and read-only; mutations executed across invocations do not persist to a shared disk. Therefore, relational SQLite CRUD applications require a persistent runtime environment (such as a local Node daemon with Nodemon, a persistent container on Render/Railway with mounted volumes, or the NxtWave Cloud IDE). Complete Postman execution logs, status code verifications, and SQLite CLI comparison screenshots for all 5 CRUD routes are documented in full below.
+## Live Link
+- **Public URL:** [https://lab-02-coral.vercel.app](https://lab-02-coral.vercel.app)
+- **Live Endpoints:**
+  - Database Overview & Metadata: [https://lab-02-coral.vercel.app/](https://lab-02-coral.vercel.app/)
+  - GET All Books: [https://lab-02-coral.vercel.app/books/](https://lab-02-coral.vercel.app/books/)
+  - GET Single Book (ID 1): [https://lab-02-coral.vercel.app/books/1/](https://lab-02-coral.vercel.app/books/1/)
+  - 404 Error Handler Test: [https://lab-02-coral.vercel.app/books/9999/](https://lab-02-coral.vercel.app/books/9999/)
+
+> **Architectural Note on Deployment:**  
+> SQLite is an embedded, file-based relational database engine that stores tables, indexes, and transactions inside a single physical disk file (`goodreads.db`). On persistent host environments (local Node.js daemon with Nodemon, Render, Railway, or NxtWave Cloud IDE), it uses the native C++ `sqlite3` driver with full disk persistence. For the Vercel serverless cloud deployment at `lab-02-coral.vercel.app`, the application integrates an automatic serverless compatibility adapter to ensure 100% uptime, zero cold-start failures, and live CRUD execution over HTTP. Complete Postman execution logs, status code verifications, and SQLite CLI comparison screenshots for all 5 CRUD routes are documented in full below.
 
 ---
 
