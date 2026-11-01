@@ -19,7 +19,7 @@ This repository contains all laboratory assignments (from `lab-01` through `lab-
 | Lab Folder | Title / Topic | Status | Documentation Link |
 | :--- | :--- | :--- | :--- |
 | [`lab-01/`](./lab-01/) | Node.js and Express server setup, routing, status codes & 404 handler | **Completed** | [Lab 1 Documentation](./lab-01/README.md) |
-| `lab-02/` | Lab 2: Express Middleware & Request Processing | Upcoming | - |
+| [`lab-02/`](./lab-02/) | Lab 2: SQLite database and CRUD routes | **Completed** | [Lab 2 Documentation](./lab-02/README.md) |
 | `lab-03/` | Lab 3: RESTful CRUD APIs | Upcoming | - |
 | `lab-04/` | Lab 4: Database Integration & Parameterised Queries | Upcoming | - |
 | `lab-05/` | Lab 5: Authentication & Password Hashing | Upcoming | - |
@@ -39,11 +39,25 @@ This repository contains all laboratory assignments (from `lab-01` through `lab-
 
 ---
 
-## Running Lab 1
-For full installation instructions, endpoint documentation, viva answers, and screenshots, visit the [Lab 1 README](./lab-01/README.md).
+## Running the Labs
+
+### Running Lab 1: Node.js & Express Server
+See [Lab 1 README](./lab-01/README.md) for full endpoint documentation and screenshots.
 ```bash
 cd lab-01
 npm install
 npm start
 ```
 Server runs on: `http://localhost:3000`
+
+### Running Lab 2: SQLite Database & CRUD Routes
+See [Lab 2 README](./lab-02/README.md) for full endpoint documentation, viva answers, and Postman screenshots.
+```bash
+cd lab-02
+npm install
+npm run dev     # Starts with nodemon live reloading
+npm test        # Runs 15 automated integration tests
+```
+Server runs on: `http://localhost:3000`
+Interactive SQLite CLI: `npm run cli`
+

@@ -1,0 +1,415 @@
+/**
+ * Lab 2: SQLite database and CRUD routes
+ * Course: Backend Development Fundamentals · Year II Term II · Aurora
+ * Faculty: Joel Prashanth D
+ * Student: G Sainadh Reddy · Registration Number: 252U1R6076 · Section: CSE 2B
+ * 
+ * Tasks:
+ * 1. Install sqlite, sqlite3, and nodemon; run server with live reload.
+ * 2. Create database file `goodreads.db` and table `book(id, title, author, price, pages)`.
+ * 3. Write one `initializeDBAndServer()` async function that opens DB and starts server.
+ * 4. CRUD Routes:
+ *    - GET /books/ (all books)
+ *    - GET /books/:bookId/ (one book)
+ *    - POST /books/ (add book)
+ *    - PUT /books/:bookId/ (update book)
+ *    - DELETE /books/:bookId/ (delete book)
+ * 5. Use `?` placeholders in every query that takes user input (prevent SQL injection).
+ */
+
+const express = require('express');
+const path = require('path');
+const { open } = require('sqlite');
+const sqlite3 = require('sqlite3');
+
+const app = express();
+
+// Middleware to parse JSON request bodies
+app.use(express.json());
+
+// Server configuration
+const PORT = process.env.PORT || 3000;
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'goodreads.db');
+let db = null;
+
+// Student and Lab Metadata
+const LAB_METADATA = {
+  lab: 'Lab 2: SQLite database and CRUD routes',
+  student: 'G Sainadh Reddy',
+  registrationNumber: '252U1R6076',
+  section: 'CSE 2B',
+  course: 'Backend Development Fundamentals',
+  faculty: 'Joel Prashanth D',
+  institution: 'Aurora'
+};
+
+// Request Logging Middleware: Logs method, url, status code, and latency
+app.use((req, res, next) => {
+  const startTime = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> Status: ${res.statusCode} (${duration}ms)`);
+  });
+  next();
+});
+
+// ====================================================================
+// Task 3: initializeDBAndServer()
+// Opens database and starts server only after successful connection
+// ====================================================================
+const initializeDBAndServer = async () => {
+  try {
+    db = await open({
+      filename: dbPath,
+      driver: sqlite3.Database,
+    });
+
+    // Ensure the table exists even on a fresh deployment
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS book (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        author TEXT NOT NULL,
+        price INTEGER NOT NULL,
+        pages INTEGER NOT NULL
+      );
+    `);
+
+    // Verify row count; if table is empty, seed 10 initial records
+    const countResult = await db.get('SELECT COUNT(*) as count FROM book;');
+    if (countResult.count === 0) {
+      console.log('[DB] Seeding initial 10 records into book table...');
+      await db.exec(`
+        INSERT INTO book (title, author, price, pages) VALUES
+          ('Harry Potter and the Sorcerer''s Stone', 'J.K. Rowling', 450, 320),
+          ('The Hobbit', 'J.R.R. Tolkien', 399, 310),
+          ('To Kill a Mockingbird', 'Harper Lee', 299, 281),
+          ('1984', 'George Orwell', 250, 328),
+          ('The Great Gatsby', 'F. Scott Fitzgerald', 199, 180),
+          ('Pride and Prejudice', 'Jane Austen', 220, 279),
+          ('The Catcher in the Rye', 'J.D. Salinger', 310, 234),
+          ('Clean Code', 'Robert C. Martin', 850, 464),
+          ('The Pragmatic Programmer', 'Andrew Hunt & David Thomas', 920, 352),
+          ('Atomic Habits', 'James Clear', 499, 320);
+      `);
+      console.log('[DB] Seeding completed.');
+    }
+
+    if (process.env.NODE_ENV !== 'test') {
+      app.listen(PORT, () => {
+        console.log('====================================================');
+        console.log(`🚀 Server running at http://localhost:${PORT}/`);
+        console.log(`📚 Database connected successfully: ${dbPath}`);
+        console.log(`📖 Lab: ${LAB_METADATA.lab}`);
+        console.log(`👤 Student: ${LAB_METADATA.student} (${LAB_METADATA.registrationNumber})`);
+        console.log('Available Endpoints:');
+        console.log(`  - GET    http://localhost:${PORT}/books/`);
+        console.log(`  - GET    http://localhost:${PORT}/books/:bookId/`);
+        console.log(`  - POST   http://localhost:${PORT}/books/`);
+        console.log(`  - PUT    http://localhost:${PORT}/books/:bookId/`);
+        console.log(`  - DELETE http://localhost:${PORT}/books/:bookId/`);
+        console.log('====================================================');
+      });
+    }
+  } catch (e) {
+    console.error(`DB Error: ${e.message}`);
+    process.exit(1);
+  }
+};
+
+// ====================================================================
+// Informational Root Route
+// ====================================================================
+app.get('/', async (req, res) => {
+  try {
+    const bookCount = db ? (await db.get('SELECT COUNT(*) as count FROM book;')).count : 0;
+    res.status(200).json({
+      status: 'success',
+      lab: LAB_METADATA,
+      database: {
+        engine: 'SQLite3',
+        file: 'goodreads.db',
+        status: 'Connected',
+        totalBooks: bookCount
+      },
+      endpoints: [
+        { method: 'GET', path: '/books/', description: 'Get all books from SQLite database' },
+        { method: 'GET', path: '/books/:bookId/', description: 'Get details of a single book by ID' },
+        { method: 'POST', path: '/books/', description: 'Add a new book (requires title, author, price, pages in JSON body)' },
+        { method: 'PUT', path: '/books/:bookId/', description: 'Update an existing book by ID' },
+        { method: 'DELETE', path: '/books/:bookId/', description: 'Remove a book by ID' }
+      ]
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+  }
+});
+
+// ====================================================================
+// Task 4 - Route 1: GET /books/ (Retrieve all books)
+// Task 5: Safe query, ordered by ID
+// ====================================================================
+app.get(['/books', '/books/'], async (req, res) => {
+  try {
+    const getBooksQuery = `
+      SELECT
+        id,
+        title,
+        author,
+        price,
+        pages
+      FROM
+        book
+      ORDER BY
+        id ASC;
+    `;
+    const booksArray = await db.all(getBooksQuery);
+    res.status(200).json(booksArray);
+  } catch (error) {
+    console.error('Error fetching books:', error.message);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+
+// ====================================================================
+// Task 4 - Route 2: GET /books/:bookId/ (Retrieve single book by ID)
+// Task 5: Uses ? placeholder for bookId parameter
+// ====================================================================
+app.get(['/books/:bookId', '/books/:bookId/'], async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    
+    // Parameterized SQL query using ? placeholder
+    const getBookQuery = `
+      SELECT
+        id,
+        title,
+        author,
+        price,
+        pages
+      FROM
+        book
+      WHERE
+        id = ?;
+    `;
+    
+    const book = await db.get(getBookQuery, [bookId]);
+
+    if (!book) {
+      return res.status(404).json({
+        error: 'Book Not Found',
+        message: `No book found with ID: ${bookId}`,
+        statusCode: 404
+      });
+    }
+
+    res.status(200).json(book);
+  } catch (error) {
+    console.error(`Error fetching book ${req.params.bookId}:`, error.message);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+
+// ====================================================================
+// Task 4 - Route 3: POST /books/ (Add a new book)
+// Task 5: Uses ? placeholders for all inserted columns
+// ====================================================================
+app.post(['/books', '/books/'], async (req, res) => {
+  try {
+    const { title, author, price, pages } = req.body;
+
+    // Validation
+    if (!title || !author || price === undefined || pages === undefined) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Missing required book fields. Please provide title, author, price, and pages.',
+        statusCode: 400
+      });
+    }
+
+    const parsedPrice = parseInt(price, 10);
+    const parsedPages = parseInt(pages, 10);
+
+    if (isNaN(parsedPrice) || isNaN(parsedPages) || parsedPrice < 0 || parsedPages < 0) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Price and pages must be non-negative integers.',
+        statusCode: 400
+      });
+    }
+
+    // Parameterized SQL query using ? placeholders
+    const addBookQuery = `
+      INSERT INTO
+        book (title, author, price, pages)
+      VALUES
+        (?, ?, ?, ?);
+    `;
+
+    const dbResponse = await db.run(addBookQuery, [
+      title.trim(),
+      author.trim(),
+      parsedPrice,
+      parsedPages
+    ]);
+
+    const bookId = dbResponse.lastID;
+
+    res.status(201).json({
+      message: 'Book Successfully Added',
+      bookId: bookId,
+      book: {
+        id: bookId,
+        title: title.trim(),
+        author: author.trim(),
+        price: parsedPrice,
+        pages: parsedPages
+      }
+    });
+  } catch (error) {
+    console.error('Error adding book:', error.message);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+
+// ====================================================================
+// Task 4 - Route 4: PUT /books/:bookId/ (Update an existing book)
+// Task 5: Uses ? placeholders for all columns and WHERE clause
+// ====================================================================
+app.put(['/books/:bookId', '/books/:bookId/'], async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const { title, author, price, pages } = req.body;
+
+    // Check if book exists first
+    const existingBook = await db.get('SELECT id FROM book WHERE id = ?;', [bookId]);
+    if (!existingBook) {
+      return res.status(404).json({
+        error: 'Book Not Found',
+        message: `Cannot update: No book found with ID: ${bookId}`,
+        statusCode: 404
+      });
+    }
+
+    // Validate inputs
+    if (!title || !author || price === undefined || pages === undefined) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Missing required fields for update. Please provide title, author, price, and pages.',
+        statusCode: 400
+      });
+    }
+
+    const parsedPrice = parseInt(price, 10);
+    const parsedPages = parseInt(pages, 10);
+
+    if (isNaN(parsedPrice) || isNaN(parsedPages) || parsedPrice < 0 || parsedPages < 0) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Price and pages must be non-negative integers.',
+        statusCode: 400
+      });
+    }
+
+    // Parameterized UPDATE query with ? placeholders
+    const updateBookQuery = `
+      UPDATE
+        book
+      SET
+        title = ?,
+        author = ?,
+        price = ?,
+        pages = ?
+      WHERE
+        id = ?;
+    `;
+
+    const dbResponse = await db.run(updateBookQuery, [
+      title.trim(),
+      author.trim(),
+      parsedPrice,
+      parsedPages,
+      bookId
+    ]);
+
+    res.status(200).json({
+      message: 'Book Details Updated Successfully',
+      bookId: parseInt(bookId, 10),
+      changes: dbResponse.changes,
+      updatedBook: {
+        id: parseInt(bookId, 10),
+        title: title.trim(),
+        author: author.trim(),
+        price: parsedPrice,
+        pages: parsedPages
+      }
+    });
+  } catch (error) {
+    console.error(`Error updating book ${req.params.bookId}:`, error.message);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+
+// ====================================================================
+// Task 4 - Route 5: DELETE /books/:bookId/ (Delete a book)
+// Task 5: Uses ? placeholder for bookId in WHERE clause
+// ====================================================================
+app.delete(['/books/:bookId', '/books/:bookId/'], async (req, res) => {
+  try {
+    const { bookId } = req.params;
+
+    // Check if book exists first
+    const existingBook = await db.get('SELECT id, title FROM book WHERE id = ?;', [bookId]);
+    if (!existingBook) {
+      return res.status(404).json({
+        error: 'Book Not Found',
+        message: `Cannot delete: No book found with ID: ${bookId}`,
+        statusCode: 404
+      });
+    }
+
+    // Parameterized DELETE query with ? placeholder
+    const deleteBookQuery = `
+      DELETE FROM
+        book
+      WHERE
+        id = ?;
+    `;
+
+    const dbResponse = await db.run(deleteBookQuery, [bookId]);
+
+    res.status(200).json({
+      message: 'Book Deleted Successfully',
+      bookId: parseInt(bookId, 10),
+      deletedBookTitle: existingBook.title,
+      changes: dbResponse.changes
+    });
+  } catch (error) {
+    console.error(`Error deleting book ${req.params.bookId}:`, error.message);
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
+  }
+});
+
+// ====================================================================
+// 404 Catch-All Middleware for undefined routes
+// ====================================================================
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Not Found',
+    message: `Cannot ${req.method} ${req.originalUrl} - Route not found.`,
+    validEndpoints: [
+      { method: 'GET', path: '/books/' },
+      { method: 'GET', path: '/books/:bookId/' },
+      { method: 'POST', path: '/books/' },
+      { method: 'PUT', path: '/books/:bookId/' },
+      { method: 'DELETE', path: '/books/:bookId/' }
+    ]
+  });
+});
+
+// Start the server if executed directly
+if (require.main === module) {
+  initializeDBAndServer();
+}
+
+module.exports = { app, initializeDBAndServer, getDb: () => db };

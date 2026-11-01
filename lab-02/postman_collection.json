@@ -1,0 +1,119 @@
+{
+  "info": {
+    "_postman_id": "lab-02-sqlite-crud-goodreads",
+    "name": "Lab 2: SQLite Database and CRUD Routes (Aurora - Joel Prashanth D)",
+    "description": "Postman API test collection for Lab 2: SQLite database and CRUD routes in Express.js. Built for student G Sainadh Reddy (252U1R6076).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. GET /books/ (All Books)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books/",
+          "host": ["{{baseUrl}}"],
+          "path": ["books", ""]
+        },
+        "description": "Fetches all books from the SQLite database table `book` ordered by id."
+      },
+      "response": []
+    },
+    {
+      "name": "2. GET /books/:bookId/ (Single Book by ID)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books/1/",
+          "host": ["{{baseUrl}}"],
+          "path": ["books", "1", ""]
+        },
+        "description": "Fetches a single book by ID using parameterized query with ? placeholder."
+      },
+      "response": []
+    },
+    {
+      "name": "3. POST /books/ (Add New Book)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Designing Data-Intensive Applications\",\n  \"author\": \"Martin Kleppmann\",\n  \"price\": 799,\n  \"pages\": 616\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/books/",
+          "host": ["{{baseUrl}}"],
+          "path": ["books", ""]
+        },
+        "description": "Inserts a new book into the SQLite database and returns the generated bookId."
+      },
+      "response": []
+    },
+    {
+      "name": "4. PUT /books/:bookId/ (Update Existing Book)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Designing Data-Intensive Applications (2nd Edition)\",\n  \"author\": \"Martin Kleppmann\",\n  \"price\": 899,\n  \"pages\": 650\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/books/11/",
+          "host": ["{{baseUrl}}"],
+          "path": ["books", "11", ""]
+        },
+        "description": "Updates details of an existing book by ID using parameterized UPDATE query."
+      },
+      "response": []
+    },
+    {
+      "name": "5. DELETE /books/:bookId/ (Remove Book)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books/11/",
+          "host": ["{{baseUrl}}"],
+          "path": ["books", "11", ""]
+        },
+        "description": "Deletes a book from the SQLite database by ID."
+      },
+      "response": []
+    },
+    {
+      "name": "6. GET /books/:bookId/ (Error 404 Not Found)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books/9999/",
+          "host": ["{{baseUrl}}"],
+          "path": ["books", "9999", ""]
+        },
+        "description": "Tests 404 Not Found error handling for non-existent book ID."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
