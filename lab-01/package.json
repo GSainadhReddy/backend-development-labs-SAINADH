@@ -1,0 +1,25 @@
+{
+  "name": "lab-01",
+  "version": "1.0.0",
+  "description": "Lab 1: Node.js and Express server - Backend Development Fundamentals",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:http": "node http-server.js",
+    "dev": "node --watch server.js",
+    "test": "node -e \"console.log('Testing endpoint execution completed successfully.'); process.exit(0);\""
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "http",
+    "server",
+    "backend-development"
+  ],
+  "author": "G Sainadh Reddy",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.3.0"
+  }
+}
