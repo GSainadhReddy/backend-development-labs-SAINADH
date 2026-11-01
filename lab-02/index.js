@@ -19,6 +19,7 @@
 
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { open } = require('sqlite');
 const sqlite3 = require('sqlite3');
 
@@ -29,8 +30,37 @@ app.use(express.json());
 
 // Server configuration
 const PORT = process.env.PORT || 3000;
-const dbPath = process.env.DB_PATH || path.join(__dirname, 'goodreads.db');
 let db = null;
+let dbPromise = null;
+
+// Resolve SQLite Database Path
+// On Vercel / serverless environments, copy goodreads.db to /tmp so it is fully writable
+const getDbPath = () => {
+  if (process.env.VERCEL) {
+    const tmpDbPath = path.join('/tmp', 'goodreads.db');
+    if (!fs.existsSync(tmpDbPath)) {
+      const candidatePaths = [
+        path.join(__dirname, 'goodreads.db'),
+        path.join(__dirname, '..', 'goodreads.db'),
+        path.join(process.cwd(), 'goodreads.db'),
+        path.join(process.cwd(), 'lab-02', 'goodreads.db'),
+      ];
+      for (const candidate of candidatePaths) {
+        if (fs.existsSync(candidate)) {
+          try {
+            fs.copyFileSync(candidate, tmpDbPath);
+            console.log(`[VERCEL] Copied ${candidate} to ${tmpDbPath}`);
+            break;
+          } catch (e) {
+            console.error(`[VERCEL] Error copying DB from ${candidate}:`, e.message);
+          }
+        }
+      }
+    }
+    return tmpDbPath;
+  }
+  return process.env.DB_PATH || path.join(__dirname, 'goodreads.db');
+};
 
 // Student and Lab Metadata
 const LAB_METADATA = {
@@ -53,53 +83,66 @@ app.use((req, res, next) => {
   next();
 });
 
+// Ensure DB is initialized and table exists
+const ensureDbConnected = async () => {
+  if (db) return db;
+  if (!dbPromise) {
+    dbPromise = (async () => {
+      const activeDbPath = getDbPath();
+      db = await open({
+        filename: activeDbPath,
+        driver: sqlite3.Database,
+      });
+
+      // Ensure the table exists even on a fresh deployment
+      await db.exec(`
+        CREATE TABLE IF NOT EXISTS book (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          author TEXT NOT NULL,
+          price INTEGER NOT NULL,
+          pages INTEGER NOT NULL
+        );
+      `);
+
+      // Verify row count; if table is empty, seed 10 initial records
+      const countResult = await db.get('SELECT COUNT(*) as count FROM book;');
+      if (countResult.count === 0) {
+        console.log('[DB] Seeding initial 10 records into book table...');
+        await db.exec(`
+          INSERT INTO book (title, author, price, pages) VALUES
+            ('Harry Potter and the Sorcerer''s Stone', 'J.K. Rowling', 450, 320),
+            ('The Hobbit', 'J.R.R. Tolkien', 399, 310),
+            ('To Kill a Mockingbird', 'Harper Lee', 299, 281),
+            ('1984', 'George Orwell', 250, 328),
+            ('The Great Gatsby', 'F. Scott Fitzgerald', 199, 180),
+            ('Pride and Prejudice', 'Jane Austen', 220, 279),
+            ('The Catcher in the Rye', 'J.D. Salinger', 310, 234),
+            ('Clean Code', 'Robert C. Martin', 850, 464),
+            ('The Pragmatic Programmer', 'Andrew Hunt & David Thomas', 920, 352),
+            ('Atomic Habits', 'James Clear', 499, 320);
+        `);
+        console.log('[DB] Seeding completed.');
+      }
+      return db;
+    })();
+  }
+  return dbPromise;
+};
+
 // ====================================================================
 // Task 3: initializeDBAndServer()
 // Opens database and starts server only after successful connection
 // ====================================================================
 const initializeDBAndServer = async () => {
   try {
-    db = await open({
-      filename: dbPath,
-      driver: sqlite3.Database,
-    });
+    await ensureDbConnected();
 
-    // Ensure the table exists even on a fresh deployment
-    await db.exec(`
-      CREATE TABLE IF NOT EXISTS book (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        author TEXT NOT NULL,
-        price INTEGER NOT NULL,
-        pages INTEGER NOT NULL
-      );
-    `);
-
-    // Verify row count; if table is empty, seed 10 initial records
-    const countResult = await db.get('SELECT COUNT(*) as count FROM book;');
-    if (countResult.count === 0) {
-      console.log('[DB] Seeding initial 10 records into book table...');
-      await db.exec(`
-        INSERT INTO book (title, author, price, pages) VALUES
-          ('Harry Potter and the Sorcerer''s Stone', 'J.K. Rowling', 450, 320),
-          ('The Hobbit', 'J.R.R. Tolkien', 399, 310),
-          ('To Kill a Mockingbird', 'Harper Lee', 299, 281),
-          ('1984', 'George Orwell', 250, 328),
-          ('The Great Gatsby', 'F. Scott Fitzgerald', 199, 180),
-          ('Pride and Prejudice', 'Jane Austen', 220, 279),
-          ('The Catcher in the Rye', 'J.D. Salinger', 310, 234),
-          ('Clean Code', 'Robert C. Martin', 850, 464),
-          ('The Pragmatic Programmer', 'Andrew Hunt & David Thomas', 920, 352),
-          ('Atomic Habits', 'James Clear', 499, 320);
-      `);
-      console.log('[DB] Seeding completed.');
-    }
-
-    if (process.env.NODE_ENV !== 'test') {
+    if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
       app.listen(PORT, () => {
         console.log('====================================================');
         console.log(`🚀 Server running at http://localhost:${PORT}/`);
-        console.log(`📚 Database connected successfully: ${dbPath}`);
+        console.log(`📚 Database connected successfully: ${getDbPath()}`);
         console.log(`📖 Lab: ${LAB_METADATA.lab}`);
         console.log(`👤 Student: ${LAB_METADATA.student} (${LAB_METADATA.registrationNumber})`);
         console.log('Available Endpoints:');
@@ -113,9 +156,23 @@ const initializeDBAndServer = async () => {
     }
   } catch (e) {
     console.error(`DB Error: ${e.message}`);
-    process.exit(1);
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    }
+    throw e;
   }
 };
+
+// Serverless Safety Middleware: Ensures DB is connected before handling any route
+app.use(async (req, res, next) => {
+  try {
+    await ensureDbConnected();
+    next();
+  } catch (err) {
+    console.error('Database connection error in request middleware:', err);
+    res.status(500).json({ error: 'Database Initialization Error', details: err.message });
+  }
+});
 
 // ====================================================================
 // Informational Root Route
@@ -412,4 +469,10 @@ if (require.main === module) {
   initializeDBAndServer();
 }
 
-module.exports = { app, initializeDBAndServer, getDb: () => db };
+// Export both standard app (for Vercel & serverless) and named properties
+app.app = app;
+app.initializeDBAndServer = initializeDBAndServer;
+app.ensureDbConnected = ensureDbConnected;
+app.getDb = () => db;
+
+module.exports = app;
