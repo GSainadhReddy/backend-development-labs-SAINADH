@@ -141,6 +141,12 @@ Server console logging request timestamps, HTTP methods, paths, and status codes
 
 ---
 
+### 7. Live Vercel Cloud Deployment
+Verified live running on Vercel at `https://lab-01-two.vercel.app/about`:
+![Live Vercel Deployment](screenshots/07-vercel-live-deployment.png)
+
+---
+
 ## Task Details & Explanation
 
 ### Task 1: `package.json` Field Analysis
