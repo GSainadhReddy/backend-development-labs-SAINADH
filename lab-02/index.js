@@ -555,6 +555,16 @@ app.delete(['/books/:bookId', '/books/:bookId/'], async (req, res) => {
 });
 
 // ====================================================================
+// Mount Lab 3 REST API Sub-Router
+// ====================================================================
+try {
+  const lab03App = require('./lab-03/server.js');
+  app.use('/lab-03', lab03App);
+} catch (e) {
+  console.warn('[ROUTER] Could not mount Lab 3:', e.message);
+}
+
+// ====================================================================
 // 404 Catch-All Middleware for undefined routes
 // ====================================================================
 app.use((req, res) => {
@@ -566,7 +576,8 @@ app.use((req, res) => {
       { method: 'GET', path: '/books/:bookId/' },
       { method: 'POST', path: '/books/' },
       { method: 'PUT', path: '/books/:bookId/' },
-      { method: 'DELETE', path: '/books/:bookId/' }
+      { method: 'DELETE', path: '/books/:bookId/' },
+      { method: 'GET', path: '/lab-03/books', description: 'Lab 3: REST API with search_q, order_by, price filters & pagination' }
     ]
   });
 });
