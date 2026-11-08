@@ -5,7 +5,19 @@
 **Course:** Backend Development Fundamentals · **Year & Term:** Year II Term II · **Institution:** Aurora  
 **Faculty:** Joel Prashanth D  
 **GitHub Repository:** [GSainadhReddy/backend-development-labs-SAINADH](https://github.com/GSainadhReddy/backend-development-labs-SAINADH)  
-**Lab Folder:** `lab-03/`
+**Lab Folder:** `lab-03/`  
+**Live Vercel Deployment:** [https://lab-02-coral.vercel.app/lab-03/books](https://lab-02-coral.vercel.app/lab-03/books)  
+
+---
+
+## 🌐 Live Vercel Endpoints
+- **Overview & Metadata:** [https://lab-02-coral.vercel.app/lab-03](https://lab-02-coral.vercel.app/lab-03)
+- **GET All Books (Default):** [https://lab-02-coral.vercel.app/lab-03/books](https://lab-02-coral.vercel.app/lab-03/books)
+- **Search by Title (`search_q=Clean`):** [https://lab-02-coral.vercel.app/lab-03/books?search_q=Clean](https://lab-02-coral.vercel.app/lab-03/books?search_q=Clean)
+- **Sort Descending by Price:** [https://lab-02-coral.vercel.app/lab-03/books?order_by=price&order=DESC](https://lab-02-coral.vercel.app/lab-03/books?order_by=price&order=DESC)
+- **Price Range Filter (30 to 50):** [https://lab-02-coral.vercel.app/lab-03/books?min_price=30&max_price=50](https://lab-02-coral.vercel.app/lab-03/books?min_price=30&max_price=50)
+- **GET Single Book (ID 1):** [https://lab-02-coral.vercel.app/lab-03/books/1](https://lab-02-coral.vercel.app/lab-03/books/1)
+- **404 Not Found Test:** [https://lab-02-coral.vercel.app/lab-03/books/999999](https://lab-02-coral.vercel.app/lab-03/books/999999)
 
 ---
 
