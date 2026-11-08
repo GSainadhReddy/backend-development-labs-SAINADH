@@ -5,14 +5,26 @@ const lab03App = require('../lab-03/server.js');
 
 const rootApp = express();
 
-// Sub-path routing
+// Sub-path routing for distinct lab deployments
 rootApp.use('/lab-01', lab01App);
 rootApp.use('/lab-02', lab02App);
 rootApp.use('/lab-03', lab03App);
 
-// Smart routing: /books and root route to lab-02; /about and /time to lab-01
+// Smart routing
 rootApp.use((req, res, next) => {
   if (req.url.startsWith('/books')) {
+    // If query parameters from Lab 3 are used, route to Lab 3 REST API
+    if (
+      req.query.search_q ||
+      req.query.order_by ||
+      req.query.order ||
+      req.query.min_price ||
+      req.query.max_price ||
+      req.query.limit ||
+      req.query.offset
+    ) {
+      return lab03App(req, res, next);
+    }
     return lab02App(req, res, next);
   }
   if (req.url === '/about' || req.url === '/time') {

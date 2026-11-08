@@ -59,6 +59,27 @@ function validateBookBody(req, res, next) {
    ========================================================================== */
 
 /**
+ * Root metadata endpoint for Lab 3 overview
+ */
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    lab: 'Lab 3: REST API, query parameters, validation, debugging',
+    student: 'G Sainadh Reddy',
+    registrationNumber: '252U1R6076',
+    section: 'CSE 2B',
+    faculty: 'Joel Prashanth D',
+    availableEndpoints: [
+      { method: 'GET', path: '/books', description: 'List books with search_q, order_by, order, limit, offset, min_price, max_price' },
+      { method: 'GET', path: '/books/:id', description: 'Get single book by ID' },
+      { method: 'POST', path: '/books', description: 'Create new book (requires title, author, numeric price)' },
+      { method: 'PUT', path: '/books/:id', description: 'Update book by ID' },
+      { method: 'DELETE', path: '/books/:id', description: 'Delete book by ID' }
+    ]
+  });
+});
+
+/**
  * Task 1, 2, 3: GET /books
  * Supports query parameters:
  *  - search_q: partial title match (LIKE %search_q%)
