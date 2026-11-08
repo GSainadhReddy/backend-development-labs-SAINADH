@@ -173,6 +173,34 @@ Detailed cURL commands and response samples are documented in [`postman/POSTMAN_
 
 ---
 
+## 📸 Postman Execution Screenshots
+
+### 1. GET /books — Default List & Pagination (200 OK)
+![01 GET All Books](./screenshots/01-postman-get-all-books.png)
+
+### 2. GET /books?search_q=Clean — Partial Title Search with LIKE (200 OK)
+![02 Search Title](./screenshots/02-postman-search-title.png)
+
+### 3. GET /books?order_by=price&order=DESC — Sorting Descending by Price (200 OK)
+![03 Sort by Price](./screenshots/03-postman-sort-price-desc.png)
+
+### 4. GET /books?min_price=30&max_price=50 — Price Range Filter (200 OK)
+![04 Price Range Filter](./screenshots/04-postman-price-range-filter.png)
+
+### 5. POST /books — Create Book (201 Created)
+![05 Create Book](./screenshots/05-postman-post-create-book.png)
+
+### 6. POST /books — Validation Error: Missing Title (400 Bad Request)
+![06 Validation Error 400](./screenshots/06-postman-validation-error-400.png)
+
+### 7. GET /books/1 — Retrieve Single Book Details (200 OK)
+![07 Get Book by ID](./screenshots/07-postman-get-single-book.png)
+
+### 8. GET /books/999999 — Non-existent Record (404 Not Found)
+![08 404 Not Found](./screenshots/08-postman-404-not-found.png)
+
+---
+
 ## 🛠️ Debugging Exercise Walkthrough
 
 The faculty handout contains 4 intentional bugs in `debugging-exercise/broken-server.js`:
