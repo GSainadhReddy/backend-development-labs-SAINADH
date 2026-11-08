@@ -1,0 +1,7 @@
+node_modules/
+*.log
+.DS_Store
+books.db-journal
+books.db-wal
+books.db-shm
+
