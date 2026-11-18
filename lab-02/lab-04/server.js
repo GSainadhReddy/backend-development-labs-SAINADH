@@ -255,6 +255,24 @@ app.get(['/profile', '/profile/'], async (req, res) => {
 });
 
 /**
+ * Books catalog route (backward compatibility with Lab 2 & 3)
+ */
+const SAMPLE_BOOKS = [
+  { id: 1, title: 'Clean Code', author: 'Robert C. Martin', price: 34.99 },
+  { id: 2, title: 'The Pragmatic Programmer', author: 'Andrew Hunt & David Thomas', price: 42.50 },
+  { id: 3, title: 'Design Patterns', author: 'Erich Gamma et al.', price: 54.00 },
+  { id: 4, title: 'JavaScript: The Good Parts', author: 'Douglas Crockford', price: 29.99 },
+  { id: 5, title: "You Don't Know JS", author: 'Kyle Simpson', price: 24.50 }
+];
+
+app.get(['/books', '/books/'], (req, res) => {
+  res.status(200).json({
+    message: 'Books catalog (Lab 2/3 compatibility). For Lab 4 Authentication, use /register, /login, and /users.',
+    books: SAMPLE_BOOKS
+  });
+});
+
+/**
  * Test utility endpoint: POST /reset
  * Clears user records for repeatable test suites.
  */
