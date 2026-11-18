@@ -352,3 +352,4 @@ const s8 = makePostmanSvg({
 renderAndSave(s8, '08-postman-404-not-found.png');
 
 console.log('All 8 Postman screenshots generated and saved successfully!');
+

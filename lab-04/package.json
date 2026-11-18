@@ -1,0 +1,32 @@
+{
+  "name": "lab-04-registration-login-jwt",
+  "version": "1.0.0",
+  "description": "Lab 4: Registration, login and JWT - Backend Development Fundamentals",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node test-api.js",
+    "generate-screenshots": "node generate-screenshots.js"
+  },
+  "keywords": [
+    "express",
+    "authentication",
+    "bcrypt",
+    "jwt",
+    "jsonwebtoken",
+    "sqlite",
+    "security"
+  ],
+  "author": "G Sainadh Reddy",
+  "license": "ISC",
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  }
+}

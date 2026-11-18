@@ -6,11 +6,18 @@
   "scripts": {
     "start": "node lab-02/index.js",
     "start:lab-01": "node lab-01/server.js",
-    "start:lab-02": "node lab-02/index.js"
+    "start:lab-02": "node lab-02/index.js",
+    "start:lab-03": "node lab-03/server.js",
+    "start:lab-04": "node lab-04/server.js",
+    "test:lab-03": "cd lab-03 && node test-api.js",
+    "test:lab-04": "cd lab-04 && node test-api.js"
   },
   "dependencies": {
-    "express": "^5.3.0",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
     "sqlite": "^5.1.1",
-    "sqlite3": "^6.0.1"
+    "sqlite3": "^5.1.7"
   }
 }

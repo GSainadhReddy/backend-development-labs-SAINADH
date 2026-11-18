@@ -2,6 +2,7 @@ const express = require('express');
 const lab01App = require('../lab-01/server.js');
 const lab02App = require('../lab-02/index.js');
 const lab03App = require('../lab-03/server.js');
+const lab04App = require('../lab-04/server.js');
 
 const rootApp = express();
 
@@ -9,9 +10,18 @@ const rootApp = express();
 rootApp.use('/lab-01', lab01App);
 rootApp.use('/lab-02', lab02App);
 rootApp.use('/lab-03', lab03App);
+rootApp.use('/lab-04', lab04App);
 
 // Smart routing
 rootApp.use((req, res, next) => {
+  if (
+    req.url.startsWith('/register') ||
+    req.url.startsWith('/login') ||
+    req.url.startsWith('/users') ||
+    req.url.startsWith('/profile')
+  ) {
+    return lab04App(req, res, next);
+  }
   if (req.url.startsWith('/books')) {
     // If query parameters from Lab 3 are used, route to Lab 3 REST API
     if (

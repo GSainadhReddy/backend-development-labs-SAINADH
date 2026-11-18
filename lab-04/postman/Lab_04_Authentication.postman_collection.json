@@ -1,0 +1,364 @@
+{
+  "info": {
+    "_postman_id": "lab04-registration-login-jwt-aurora",
+    "name": "Lab 04: Registration, Login & JWT Authentication",
+    "description": "Postman Test Collection for Lab 4: Registration, Login and JWT.\nCourse: Backend Development Fundamentals · Aurora · Faculty: Joel Prashanth D\nStudent: G Sainadh Reddy · Registration Number: 252U1R6076 · Section: CSE 2B",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Server Health & Info (GET /)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        },
+        "description": "Returns metadata, author information, and list of supported API routes."
+      },
+      "response": []
+    },
+    {
+      "name": "2. Register - Successful (POST /register)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response confirms user creation\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"User created successfully\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"sainadh_reddy\",\n  \"name\": \"G Sainadh Reddy\",\n  \"password\": \"SecurePassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["register"]
+        },
+        "description": "Registers a new user. The backend hashes the password using bcrypt.hash with 10 salt rounds before saving to SQLite."
+      },
+      "response": []
+    },
+    {
+      "name": "3. Register - Duplicate Username Rejection (POST /register)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Rejection message is 'User already exists'\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"User already exists\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"sainadh_reddy\",\n  \"name\": \"Duplicate User Attempt\",\n  \"password\": \"AnotherPassword456!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["register"]
+        },
+        "description": "Rejects registration if username already exists in the database with HTTP 400."
+      },
+      "response": []
+    },
+    {
+      "name": "4. Register - Missing Fields Validation (POST /register)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"incomplete_user\",\n  \"name\": \"Missing Password User\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/register",
+          "host": ["{{baseUrl}}"],
+          "path": ["register"]
+        },
+        "description": "Validation test: returns HTTP 400 when required payload fields are missing."
+      },
+      "response": []
+    },
+    {
+      "name": "5. Inspect Database - Verify Hashes Only (GET /users)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Passwords are stored as bcrypt hashes\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.users.length).to.be.above(0);",
+              "    var u = jsonData.users[0];",
+              "    pm.expect(u.password).to.match(/^\\$2[ab]\\$10\\$/);",
+              "    pm.expect(u.password).to.not.equal(\"SecurePassword123!\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["users"]
+        },
+        "description": "Verifies that the SQLite database contains bcrypt hashes ($2b$10$...) and never plain text passwords."
+      },
+      "response": []
+    },
+    {
+      "name": "6. Login - Success & Obtain JWT (POST /login)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response contains jwt_token\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('jwt_token');",
+              "    pm.environment.set(\"jwt_token\", jsonData.jwt_token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"sainadh_reddy\",\n  \"password\": \"SecurePassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["login"]
+        },
+        "description": "Authenticates user with bcrypt.compare. Returns a signed JWT token { jwt_token } containing the username in the payload."
+      },
+      "response": []
+    },
+    {
+      "name": "7. Login - Unknown User Rejection (POST /login)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Rejection message is 'Invalid user'\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"Invalid user\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"ghost_user_99\",\n  \"password\": \"AnyPassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["login"]
+        },
+        "description": "Returns HTTP 400 Bad Request with message 'Invalid user' when username does not exist."
+      },
+      "response": []
+    },
+    {
+      "name": "8. Login - Wrong Password Rejection (POST /login)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "pm.test(\"Rejection message is 'Invalid password'\", function () {",
+              "    pm.expect(pm.response.text()).to.include(\"Invalid password\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"sainadh_reddy\",\n  \"password\": \"IncorrectPassword123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["login"]
+        },
+        "description": "Returns HTTP 400 Bad Request with message 'Invalid password' when bcrypt.compare returns false."
+      },
+      "response": []
+    },
+    {
+      "name": "9. Protected Profile Demo - Valid Token (GET /profile)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Authorized user returned\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.tokenPayload.username).to.equal(\"sainadh_reddy\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/profile",
+          "host": ["{{baseUrl}}"],
+          "path": ["profile"]
+        },
+        "description": "Demonstration route verifying the JWT token using jwt.verify and returning the authorized profile."
+      },
+      "response": []
+    },
+    {
+      "name": "10. Protected Profile Demo - Missing Token (GET /profile)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 401 Unauthorized\", function () {",
+              "    pm.response.to.have.status(401);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/profile",
+          "host": ["{{baseUrl}}"],
+          "path": ["profile"]
+        },
+        "description": "Unauthorized access returns HTTP 401 when Authorization header is omitted."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "jwt_token",
+      "value": ""
+    }
+  ]
+}

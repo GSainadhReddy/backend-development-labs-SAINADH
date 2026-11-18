@@ -21,7 +21,7 @@ This repository contains all laboratory assignments (from `lab-01` through `lab-
 | [`lab-01/`](./lab-01/) | Node.js and Express server setup, routing, status codes & 404 handler | **Completed** | [Lab 1 Documentation](./lab-01/README.md) |
 | [`lab-02/`](./lab-02/) | Lab 2: SQLite database and CRUD routes | **Completed** | [Lab 2 Documentation](./lab-02/README.md) |
 | [`lab-03/`](./lab-03/) | Lab 3: REST API, query parameters, validation & debugging | **Completed** | [Lab 3 Documentation](./lab-03/README.md) |
-| `lab-04/` | Lab 4: Database Integration & Parameterised Queries | Upcoming | - |
+| [`lab-04/`](./lab-04/) | Lab 4: Registration, login and JWT | **Completed** | [Lab 4 Documentation](./lab-04/README.md) |
 | `lab-05/` | Lab 5: Authentication & Password Hashing | Upcoming | - |
 | `lab-06/` | Lab 6: JWT Authorization & Protected Routes | Upcoming | - |
 | `lab-07/` | Lab 7: Relational Data Modeling & Joins | Upcoming | - |
@@ -71,5 +71,17 @@ npm start       # Starts server on http://localhost:3000
 ```
 Server runs on: `http://localhost:3000`
 Postman collection: [`lab-03/postman/Lab_03_REST_API.postman_collection.json`](./lab-03/postman/Lab_03_REST_API.postman_collection.json)
+
+### Running Lab 4: Registration, Login and JWT
+See [Lab 4 README](./lab-04/README.md) for authentication architecture, bcrypt hashing, JWT analysis, Postman screenshots, and viva questions.
+```bash
+cd lab-04
+npm install
+npm test        # Runs 26 automated integration tests
+npm start       # Starts server on http://localhost:3000
+```
+Server runs on: `http://localhost:3000`
+Postman collection: [`lab-04/postman/Lab_04_Authentication.postman_collection.json`](./lab-04/postman/Lab_04_Authentication.postman_collection.json)
+
 
 
