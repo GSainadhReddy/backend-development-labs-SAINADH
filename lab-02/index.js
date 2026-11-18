@@ -565,6 +565,16 @@ try {
 }
 
 // ====================================================================
+// Mount Lab 4 Authentication & JWT Sub-Router
+// ====================================================================
+try {
+  const lab04App = require('./lab-04/server.js');
+  app.use('/lab-04', lab04App);
+} catch (e) {
+  console.warn('[ROUTER] Could not mount Lab 4:', e.message);
+}
+
+// ====================================================================
 // 404 Catch-All Middleware for undefined routes
 // ====================================================================
 app.use((req, res) => {
@@ -577,7 +587,12 @@ app.use((req, res) => {
       { method: 'POST', path: '/books/' },
       { method: 'PUT', path: '/books/:bookId/' },
       { method: 'DELETE', path: '/books/:bookId/' },
-      { method: 'GET', path: '/lab-03/books', description: 'Lab 3: REST API with search_q, order_by, price filters & pagination' }
+      { method: 'GET', path: '/lab-03/books', description: 'Lab 3: REST API with search_q, order_by, price filters & pagination' },
+      { method: 'GET', path: '/lab-04', description: 'Lab 4: Authentication & JWT API metadata' },
+      { method: 'POST', path: '/lab-04/register', description: 'Lab 4: User registration with bcrypt' },
+      { method: 'POST', path: '/lab-04/login', description: 'Lab 4: User login returning JWT token' },
+      { method: 'GET', path: '/lab-04/users', description: 'Lab 4: Database view verifying bcrypt hashes' },
+      { method: 'GET', path: '/lab-04/profile', description: 'Lab 4: Protected route demo with Bearer token' }
     ]
   });
 });
